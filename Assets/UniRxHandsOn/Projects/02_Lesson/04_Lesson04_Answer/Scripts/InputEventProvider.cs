@@ -35,12 +35,13 @@ namespace UniRxHandsOn.Lesson_04_Answer
 			// 上下左右(Horizontal & Vertical)キーのInputEvent登録
 			this.UpdateAsObservable()
 				.Select( _ => new Vector3( Input.GetAxis( HORIZONTAL ), 0, Input.GetAxis( VERTICAL ) ) )
-				.Subscribe( x => m_MoveDir.SetValueAndForceNotify( x ) );
+				.Subscribe( x => m_MoveDir.SetValueAndForceNotify( x ) );	// SetValueAndForceNotify()で、代入した値が
+																			// 前回値から変化していない場合でも強制的に
+																			// メッセージを送信する事ができる
 
 			// ジャンプ(Space)キーのInputEvent登録
 			this.UpdateAsObservable()
-				.Select( _ => Input.GetKey( KeyCode.Space ) )
-				.DistinctUntilChanged()
+				.Select( _ => Input.GetKeyDown( KeyCode.Space ) )
 				.Subscribe( x => m_Jump.Value = x );
 
 			// しゃがみ(C)キーのInputEvent登録

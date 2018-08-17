@@ -6,8 +6,7 @@ namespace UniRxHandsOn.Lesson_01_Answer
 	public class SubjectSample : MonoBehaviour
 	{
 		// Subjectの定義
-		private Subject<int> m_Subject = new Subject<int>();
-		public IObservable<int> OnValueChanged { get { return m_Subject; } }
+		public Subject<int> m_Subject = new Subject<int>();
 
 		private void Start()
 		{

@@ -33,18 +33,33 @@ namespace UniRxHandsOn.Lesson_04
 		private void Start()
 		{
 			// Sample: 上下左右(Horizontal & Vertical)キーのInputEvent登録
+			// TIPS: UpdateAsObservable()は、毎フレームメッセージを送信するためのストリームソース
+			//		 要はUnityのUpdate()
 			this.UpdateAsObservable()
 				.Select( _ => new Vector3( Input.GetAxis( HORIZONTAL ), 0, Input.GetAxis( VERTICAL ) ) )
-				.Subscribe( x => m_MoveDir.SetValueAndForceNotify( x ) );
+				.Subscribe( x => m_MoveDir.SetValueAndForceNotify( x ) );   // SetValueAndForceNotify()で、代入した値が
+																			// 前回値から変化していない場合でも強制的に
+																			// メッセージを送信する事ができる
+
+			// TIPS: キーの取得方法
+			// Input.GetKey( KeyCode ) : 指定したキー押下中は常にtrue, 離すとfalse
+			// Input.GetKeyDown( KeyCode : 指定したキーを押下した時、そのフレームだけtrue, 以降はfalse
+			// Input.GetKeyUp( KeyCode) : 指定したキーを離した時、そのフレームだけtrue, 以降はfalse
+
+
 
 			// TODO: ジャンプ(Space)キーのInputEvent登録
+			// 仕様: ジャンプキー押下でジャンプする。
+			//		 ジャンプキー押しっぱなしの場合は1回だけジャンプする挙動とすること
 
 
 			// TODO: しゃがみ(C)キーのInputEvent登録
+			// 仕様: しゃがみキー押下中はしゃがみ、離すと立つ
 
 
 			// TODO: 歩き(LeftShift)キーのInputEvent登録
-			
+			// 仕様: 歩きキー + 上下左右キー押下中は歩く、歩きキーを離すと走る
+
 
 		}
 	}

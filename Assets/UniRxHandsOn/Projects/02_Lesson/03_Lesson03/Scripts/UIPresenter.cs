@@ -20,13 +20,22 @@ namespace UniRxHandsOn.Lesson_03
 		private void Start()
 		{
 			// TODO: Timerスタート( m_Timer.StartTimer()を使用すること )
+			// TIPS: Button押下イベントはm_StartTimer.onClickで取得可能
+
 
 			// TODO: Timerストップ( m_Timer.StopTimer()を使用すること )
+			// TIPS: Button押下イベントはm_StopTimer.onClickで取得可能
+
 
 			// TODO: m_Sliderの値をm_SliderTextに表示する
+			// TIPS: Sliderの値変化イベントはm_Slider.onValueChangedで取得可能
+
 
 			// TODO: m_DropDownの文字列によって、m_ImageのColorを変更する( Convert2Color()を使用すること )
 			// TIPS: m_DropDownの文字列取得方法 → m_DropDown.options[index].text
+			// TIPS: m_ImageのColor変更方法 → m_Image.color = Convert2Color( m_DropDown.options[index].text )
+
+
 		}
 
 		private Color Convert2Color( string color )
