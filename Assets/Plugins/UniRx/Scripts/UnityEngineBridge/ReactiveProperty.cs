@@ -1,8 +1,16 @@
-﻿using System;
+﻿#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+#endif
+
+using System;
 using System.Collections.Generic;
 using System.Threading;
+using UniRx.InternalUtil;
 #if !UniRxLibrary
 using UnityEngine;
+#endif
+#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
+using System.Threading.Tasks;
 #endif
 
 namespace UniRx
@@ -108,7 +116,8 @@ namespace UniRx
                 if (!EqualityComparer.Equals(this.value, value))
                 {
                     SetValue(value);
-                    if (isDisposed) return;
+                    if (isDisposed)
+                        return;
 
                     RaiseOnNext(ref value);
                 }
@@ -153,7 +162,8 @@ namespace UniRx
         public void SetValueAndForceNotify(T value)
         {
             SetValue(value);
-            if (isDisposed) return;
+            if (isDisposed)
+                return;
 
             RaiseOnNext(ref value);
         }
@@ -369,6 +379,7 @@ namespace UniRx
         protected virtual void Dispose(bool disposing)
         {
             if (isDisposed) return;
+            sourceConnection.Dispose();
 
             var node = root;
             root = last = null;
@@ -480,6 +491,61 @@ namespace UniRx
             return new ReadOnlyReactiveProperty<T>(source);
         }
 
+#if CSHARP_7_OR_LATER || (UNITY_2018_3_OR_NEWER && (NET_STANDARD_2_0 || NET_4_6))
+
+        static readonly Action<object> Callback = CancelCallback;
+
+        static void CancelCallback(object state)
+        {
+            var tuple = (Tuple<ICancellableTaskCompletionSource, IDisposable>)state;
+            tuple.Item2.Dispose();
+            tuple.Item1.TrySetCanceled();
+        }
+
+        public static Task<T> WaitUntilValueChangedAsync<T>(this IReadOnlyReactiveProperty<T> source, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var tcs = new CancellableTaskCompletionSource<T>();
+
+            var disposable = new SingleAssignmentDisposable();
+            if (source.HasValue)
+            {
+                // Skip first value
+                var isFirstValue = true;
+                disposable.Disposable = source.Subscribe(x =>
+                {
+                    if (isFirstValue)
+                    {
+                        isFirstValue = false;
+                        return;
+                    }
+                    else
+                    {
+                        disposable.Dispose(); // finish subscription.
+                        tcs.TrySetResult(x);
+                    }
+                }, ex => tcs.TrySetException(ex), () => tcs.TrySetCanceled());
+            }
+            else
+            {
+                disposable.Disposable = source.Subscribe(x =>
+                {
+                    disposable.Dispose(); // finish subscription.
+                    tcs.TrySetResult(x);
+                }, ex => tcs.TrySetException(ex), () => tcs.TrySetCanceled());
+            }
+
+            cancellationToken.Register(Callback, Tuple.Create(tcs, disposable.Disposable), false);
+
+            return tcs.Task;
+        }
+
+        public static System.Runtime.CompilerServices.TaskAwaiter<T> GetAwaiter<T>(this IReadOnlyReactiveProperty<T> source)
+        {
+            return source.WaitUntilValueChangedAsync(CancellationToken.None).GetAwaiter();
+        }
+
+#endif
+
         /// <summary>
         /// Create ReadOnlyReactiveProperty with distinctUntilChanged: false.
         /// </summary>
@@ -517,7 +583,8 @@ namespace UniRx
             {
                 foreach (var item in xs)
                 {
-                    if (item == false) return false;
+                    if (item == false)
+                        return false;
                 }
                 return true;
             });
@@ -533,7 +600,8 @@ namespace UniRx
             {
                 foreach (var item in xs)
                 {
-                    if (item == true) return false;
+                    if (item == true)
+                        return false;
                 }
                 return true;
             });
